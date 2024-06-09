@@ -1,0 +1,255 @@
+<!-- Katherine Poole -->
+<!-- Data Visualization Final Project -->
+<!-- April 26, 2024 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UK Population & Average Home Price by Year</title>
+    <link rel="stylesheet" href="design 2 styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        h2 {
+            text-align: center; /* Center the text within the h2 element */
+        }
+    </style>
+</head>
+<body>
+
+<h2>UK Population & Average House Price Growth by Year</h2>
+
+<div class="chart-container">
+    <!-- First Chart: Average Home Price by Year -->
+    <svg id="chart1" width="900" height="350"></svg>
+    <!-- Second Chart: Population by Year -->
+    <svg id="chart2" width="900" height="350"></svg>
+</div>
+
+<script>
+    // Function to toggle pop-up box
+    function showPopup(x, y, content) {
+        const popup = d3.select("body").append("div")
+            .attr("class", "popup")
+            .style("position", "absolute")  //
+            .style("left", (x + 10) + "px")
+            .style("top", (y - 10) + "px")
+            .style("background-color", "#f0f0f0")   // make the pop-up a grey box
+            .style("border", "1px solid #ccc")  // darker grey border
+            .style("padding", "10px")
+            .style("border-radius", "5px");
+
+        // Split content into separate lines
+        const lines = content.split('|');   // split pop-up text by | delimiter
+
+        // Append each line as a separate <p> element
+        lines.forEach(line => {
+            popup.append("p").text(line.trim());    // make text stack on top of each other
+        });
+    }
+
+    // Function to hide pop-up box when not toggled
+    function hidePopup() {
+        d3.selectAll(".popup").remove();
+    }
+
+    // Load data for first chart from CSV file
+    d3.csv("avg_price_by_year.csv").then(data => {
+        // Convert data types
+        data.forEach(d => {
+            d.Year = +d.Year;
+            d.AveragePrice = +d.AveragePrice;
+            d.pct_change = +d.pct_change;
+        });
+
+        // Create SVG container for first chart
+        const svg1 = d3.select("#chart1");
+
+        // Set margins and dimensions
+        const margin1 = { top: 20, right: 20, bottom: 30, left: 50 };
+        const width1 = +svg1.attr("width") - margin1.left - margin1.right;
+        const height1 = +svg1.attr("height") - margin1.top - margin1.bottom;
+
+        // Define scales for first chart
+        const xScale1 = d3.scaleBand()
+            .domain(data.map(d => d.Year))
+            .range([margin1.left, width1])
+            .padding(0.1);
+
+        const yScale1 = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.AveragePrice)])
+            .range([height1, margin1.top]);
+
+        // Create line for first chart
+        svg1.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "cornflowerblue")
+            .attr("stroke-width", 2.5)
+            .attr("d", d3.line()
+                .x(d => xScale1(d.Year) + xScale1.bandwidth() / 2)
+                .y(d => yScale1(d.AveragePrice))
+            );
+
+        svg1.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", d => xScale1(d.Year) + xScale1.bandwidth() / 2)
+            .attr("cy", d => yScale1(d.AveragePrice))
+            .attr("r", 5)
+            .attr("fill", "cornflowerblue")
+            .on("mouseover", (event, d) => {
+                // format the AveragePrice with pound symbol and commas, without decimal places
+                const priceFormatted = `£${(d.AveragePrice).toLocaleString('en-GB')}`;
+                // format the percentage change with one decimal place and add the percentage symbol
+                const pctChangeFormatted = `${d.pct_change.toFixed(1)}%`;
+
+                showPopup(event.pageX, event.pageY, `Year: ${d.Year}| Price: ${priceFormatted}| % Change: ${pctChangeFormatted}`);
+            })
+            .on("mouseout", () => {
+                hidePopup();
+            });
+
+        // Add data labels at each joint for first chart
+        svg1.selectAll(".text1")
+            .data(data)
+            .enter()
+            .append("text")
+            .text(d => `£${(d.AveragePrice / 1000).toFixed(1)}k`)   // convert the average price to 30.1k format
+            .attr("x", d => xScale1(d.Year) + xScale1.bandwidth() / 2)
+            .attr("y", d => yScale1(d.AveragePrice) - 10)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "8px")
+            .attr("fill", "black");
+
+        // Add y-axis title
+        svg1.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height1 / 2)
+            .attr("y", margin1.left / 2)
+            .attr("text-anchor", "middle")
+            .text("Average Home Price (£)")
+            .attr("font-size", "14px")
+            .attr("fill", "black");
+
+        // Remove y-axis ticks for first chart
+        svg1.selectAll(".tick line")
+            .attr("display", "none");
+
+        // Remove borders for first chart
+        svg1.selectAll(".domain").remove();
+
+        // line graph script referenced to: https://observablehq.com/@d3/d3-line
+    });
+
+    // Load data for second chart from CSV file
+    d3.csv("population_data.csv").then(data => {
+        // Convert data types
+        data.forEach(d => {
+            d.Year = +d.Year;
+            d.Population = +d.Population;
+            d.pct_change = +d.pct_change;
+        });
+
+        // Create SVG container for second chart
+        const svg2 = d3.select("#chart2");
+
+        // Set margins and dimensions
+        const margin2 = { top: 20, right: 20, bottom: 30, left: 50 };
+        const width2 = +svg2.attr("width") - margin2.left - margin2.right;
+        const height2 = +svg2.attr("height") - margin2.top - margin2.bottom;
+
+        // Define scales for second chart
+        const xScale2 = d3.scaleBand()
+            .domain(data.map(d => d.Year))
+            .range([margin2.left, width2])
+            .padding(0.1);
+
+        const yScale2 = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.Population)])
+            .range([height2, margin2.top]);
+
+        // Create bars for second chart
+        svg2.selectAll("rect")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("x", d => xScale2(d.Year))
+            .attr("y", d => yScale2(d.Population))
+            .attr("width", xScale2.bandwidth())
+            .attr("height", d => height2 - yScale2(d.Population))
+            .attr("fill", "orange")
+            .attr("opacity", 0.8)
+            .on("mouseover", (event, d) => {
+                // Format the population with commas for thousand separators
+                const populationFormatted = d.Population.toLocaleString('en-GB');
+                // Format the percentage change with one decimal place and add the percentage symbol
+                const pctChangeFormatted = `${d.pct_change.toFixed(1)}%`;
+
+                showPopup(event.pageX, event.pageY, `Year: ${d.Year}| Population: ${populationFormatted}| % Change: ${pctChangeFormatted}`);
+            })
+            .on("mouseout", () => {
+                hidePopup();
+            });
+
+        // Add labels to the top of each bar for second chart
+        svg2.selectAll(".text2")
+            .data(data)
+            .enter()
+            .append("text")
+            .text(d => (d.Population / 1000000).toFixed(1))
+            .attr("x", d => xScale2(d.Year) + xScale2.bandwidth() / 2)
+            .attr("y", d => yScale2(d.Population) - 5) // Adjusted position to be above the bar
+            .attr("text-anchor", "middle")
+            .attr("font-size", "10px")
+            .attr("fill", "black");
+
+        // Add x-axis for second chart
+        svg2.append("g")
+            .attr("transform", `translate(0,${height2})`)
+            .call(d3.axisBottom(xScale2).tickSize(0))
+            .selectAll("text")
+            .attr("transform", "rotate(-90)")
+            .style("text-anchor", "end")
+            .attr("x", -10)
+            .attr("y", -5);
+
+        // Add y-axis title for second chart
+        svg2.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height2 / 2)
+            .attr("y", margin2.left / 2)
+            .attr("text-anchor", "middle")
+            .text("Population (millions)")
+            .attr("font-size", "14px")
+            .attr("fill", "black");
+
+        // Remove y-axis for second chart
+        svg2.append("g")
+            .attr("transform", `translate(${margin2.left},0)`)
+            .call(d3.axisLeft(yScale2).tickFormat("").ticks(null));
+
+        // Remove y-axis ticks for second chart
+        svg2.selectAll(".tick line")
+            .attr("display", "none");
+
+        // Remove spines for second chart
+        svg2.selectAll(".domain").remove();
+
+        // bar chart script referenced to: https://observablehq.com/@d3/bar-chart/2
+    });
+</script>
+
+<div class="data-section">
+    <h3>Data Sources & Processing</h3>
+    <p>UK Home Price Index (HPI) data used to generate the line graph is sourced from https://www.gov.uk/government/statistical-data-sets/uk-house-price-index-data-
+        downloads-december-2022. Data was limited to years 1995 through 2022 and grouped up to the year (data was originally at year-month granularity).
+        UK Population data used to generate the population growth bar chart is sourced from https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/population
+        estimates/datasets/estimatesofthepopulationforenglandandwales. Data was limited to years 1995 through 2022. All data pre-processing was completed in Python.
+    </p>
+</div>
+
+</body>
+</html>

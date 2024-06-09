@@ -1,0 +1,15 @@
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center the content vertically */
+    align-items: center; /* Center the content horizontally */
+}
+
+.chart-container > svg {
+    margin-bottom: -101px; /* Adjust the negative margin to move the charts closer */
+}
+
+.data-section {
+    text-align: left;
+    margin-top: 105px;  /* Make the data processing section beneath the population chart */
+}
