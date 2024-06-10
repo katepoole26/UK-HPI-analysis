@@ -1,5 +1,18 @@
 # UK-HPI-analysis
+
+## Project Overview
 This repository features analysis and D3 data visualization implementation of a UK monthly house price index (HPI) dataset.
+
+## Datasets
+* [UK HPI Data](https://www.gov.uk/government/statistical-data-sets/uk-house-price-index-data-%20downloads-december-2022)
+* [UK Population Data](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/estimatesofthepopulationforenglandandwales)
+
+## Tools
+* Python
+* Javascript
+* D3
+* CSS
+* HTML
 
 #### Exploratory research question: Analyze the affect that population size has on housing prices in the UK. Are there any detectable trends?
 Traditionally, home prices tend to become more expensive as population increases. Of course there are exceptions to this statement, however anecdotally I have witnessed this phenomenon in action in my home time as it has grown in both population size and price over my lifetime. This exploratory research question attempts to char- acterize this notion with data to understand the magnitude at which housing prices grow in relation to population.
