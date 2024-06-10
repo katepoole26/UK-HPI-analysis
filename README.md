@@ -4,7 +4,7 @@
 This repository features analysis and D3 data visualization implementation of a UK monthly house price index (HPI) dataset.
 
 ## Datasets
-* [UK HPI Data](https://www.gov.uk/government/statistical-data-sets/uk-house-price-index-data-%20downloads-december-2022)
+* [UK HPI Data](https://www.gov.uk/government/statistical-data-sets/uk-house-price-index-data-downloads-december-2022)
 * [UK Population Data](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/estimatesofthepopulationforenglandandwales)
 
 ## Tools
